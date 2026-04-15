@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IG Post Creator</title>
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="controls-panel">
+        <div class="controls-row controls-row--video">
+            <label class="file-button">
+                <input type="file" id="videoFile" accept="video/*" hidden>
+                Load Video
+            </label>
+            <button type="button" id="playPauseButton" class="replay-button" disabled aria-label="Play or pause video">Play Video</button>
+        </div>
+        <div class="controls-row controls-row--appearance">
+            <div class="background-palette">
+                <span class="background-palette-label" id="pageBackgroundLabel">Background</span>
+                <div class="background-palette-grid" role="radiogroup" aria-labelledby="pageBackgroundLabel">
+                    <!-- Warm → cool -->
+                    <label class="background-swatch" title="Yellow">
+                        <input type="radio" name="pageBackground" value="yellow">
+                        <span class="background-swatch-ui" style="background-color: var(--color-yellow);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Light pink">
+                        <input type="radio" name="pageBackground" value="light-pink">
+                        <span class="background-swatch-ui" style="background-color: var(--color-light-pink);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Green">
+                        <input type="radio" name="pageBackground" value="green">
+                        <span class="background-swatch-ui" style="background-color: var(--color-green);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Dark green">
+                        <input type="radio" name="pageBackground" value="dark-green">
+                        <span class="background-swatch-ui" style="background-color: var(--color-dark-green);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Dark gray">
+                        <input type="radio" name="pageBackground" value="dark-gray">
+                        <span class="background-swatch-ui" style="background-color: var(--color-dark-gray);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Purple">
+                        <input type="radio" name="pageBackground" value="purple">
+                        <span class="background-swatch-ui" style="background-color: var(--color-purple);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Dark blue">
+                        <input type="radio" name="pageBackground" value="dark-blue">
+                        <span class="background-swatch-ui" style="background-color: var(--color-dark-blue);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Light blue">
+                        <input type="radio" name="pageBackground" value="light-blue">
+                        <span class="background-swatch-ui" style="background-color: var(--color-light-blue);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="Dark gray (transparent)">
+                        <input type="radio" name="pageBackground" value="dark-gray-transparent">
+                        <span class="background-swatch-ui" style="background-color: var(--color-dark-gray-transparent);" aria-hidden="true"></span>
+                    </label>
+                    <label class="background-swatch" title="White (transparent)">
+                        <input type="radio" name="pageBackground" value="white-transparent" checked>
+                        <span class="background-swatch-ui" style="background-color: var(--color-white-transparent);" aria-hidden="true"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="controls-row controls-row--preview-shadow">
+            <label class="export-option preview-fit-option">
+                <input type="checkbox" id="previewDropShadow" checked>
+                <span>Drop Shadow</span>
+            </label>
+        </div>
+        <div class="controls-row controls-row--preview-fit">
+            <label class="export-option preview-fit-option">
+                <input type="checkbox" id="previewCrop9x16" checked>
+                <span>Crop to 9:16</span>
+            </label>
+        </div>
+        <div id="trimPanel" class="trim-panel" hidden>
+            <div class="export-options-title">Trim</div>
+            <label class="export-option trim-toggle">
+                <input type="checkbox" id="trimEnabled">
+                <span>Trim Video</span>
+            </label>
+            <div class="trim-inputs trim-inputs--sr" id="trimInputsRow" aria-hidden="true">
+                <label class="trim-field">
+                    <span class="trim-field-label">Start (s)</span>
+                    <input type="number" id="trimStart" min="0" step="0.01" value="0" tabindex="-1">
+                </label>
+                <label class="trim-field">
+                    <span class="trim-field-label">End (s)</span>
+                    <input type="number" id="trimEnd" min="0" step="0.01" value="" tabindex="-1">
+                </label>
+            </div>
+            <p class="trim-panel-hint">Use the timeline under the preview: drag the <strong>left</strong> and <strong>right</strong> handles, or click the bar to scrub.</p>
+            <label class="export-option trim-loop-option" id="trimLoopRow" hidden>
+                <input type="checkbox" id="trimLoop" checked>
+                <span>Loop within trim</span>
+            </label>
+            <p class="trim-hint" id="trimHint"></p>
+        </div>
+        <div class="controls-row controls-row--record">
+            <button type="button" id="startRecordButton" class="record-button">Start Recording</button>
+        </div>
+        <p class="controls-hint controls-hint--record">While recording, only the red Stop button shows; you can also press <kbd>Esc</kbd>.</p>
+        <div id="exportOptions" class="export-options">
+            <div class="export-options-title">Crop frame</div>
+            <div class="export-option-grid">
+                <label class="export-option">
+                    <input type="radio" name="exportPreset" value="square">
+                    <span>Square 1:1</span>
+                </label>
+                <label class="export-option">
+                    <input type="radio" name="exportPreset" value="feed">
+                    <span>Feed 4:5</span>
+                </label>
+                <label class="export-option">
+                    <input type="radio" name="exportPreset" value="story" checked>
+                    <span>Story / Reel 9:16</span>
+                </label>
+            </div>
+            <p class="export-server-hint" id="exportServerHint" hidden></p>
+        </div>
+    </div>
+
+    <button type="button" id="stopRecordButton" class="stop-record-button" hidden>Stop recording</button>
+
+    <div class="recording-stage" id="recordingStage">
+        <div class="recording-stage-main">
+            <div class="video-stage video-stage--crop" id="dropZone">
+                <div class="video-picture" id="videoPicture">
+                    <video
+                        id="screenVideo"
+                        playsinline
+                        muted
+                        preload="metadata"
+                    ></video>
+                </div>
+                <div class="video-placeholder" id="videoPlaceholder">
+                    <span>Load or drop a video</span>
+                </div>
+            </div>
+        </div>
+        <div class="trim-timeline" id="trimTimeline" hidden>
+            <div class="trim-timeline-meta">
+                <span class="trim-meta-item" id="trimLabelIn">In 0:00</span>
+                <span class="trim-meta-sep" aria-hidden="true">·</span>
+                <span class="trim-meta-item" id="trimLabelOut">Out 0:00</span>
+                <span class="trim-meta-sep" aria-hidden="true">·</span>
+                <span class="trim-meta-item trim-meta-item--muted" id="trimLabelLen">0:00 total</span>
+            </div>
+            <div
+                class="trim-track"
+                id="trimTrack"
+                role="presentation"
+            >
+                <div class="trim-track-bg" aria-hidden="true"></div>
+                <div class="trim-track-dim trim-track-dim--left" id="trimDimLeft" aria-hidden="true"></div>
+                <div class="trim-track-dim trim-track-dim--right" id="trimDimRight" aria-hidden="true"></div>
+                <div class="trim-track-range" id="trimRangeBar" aria-hidden="true"></div>
+                <div class="trim-track-playhead" id="trimPlayhead" aria-hidden="true"></div>
+                <button
+                    type="button"
+                    class="trim-handle trim-handle--start"
+                    id="trimHandleStart"
+                    aria-label="Trim start"
+                    tabindex="-1"
+                ></button>
+                <button
+                    type="button"
+                    class="trim-handle trim-handle--end"
+                    id="trimHandleEnd"
+                    aria-label="Trim end"
+                    tabindex="-1"
+                ></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const screenVideo = document.getElementById('screenVideo');
+        const videoFile = document.getElementById('videoFile');
+        const dropZone = document.getElementById('dropZone');
+        const videoPicture = document.getElementById('videoPicture');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const playPauseButton = document.getElementById('playPauseButton');
+
+        const BACKGROUND_PALETTE = {
+            yellow: '--color-yellow',
+            'light-pink': '--color-light-pink',
+            green: '--color-green',
+            'dark-green': '--color-dark-green',
+            'dark-gray': '--color-dark-gray',
+            purple: '--color-purple',
+            'dark-blue': '--color-dark-blue',
+            'light-blue': '--color-light-blue',
+            'dark-gray-transparent': '--color-dark-gray-transparent',
+            'white-transparent': '--color-white-transparent',
+        };
+
+        let objectUrl = null;
+
+        function parseCssHexToRgba(hex) {
+            let h = String(hex).replace('#', '').trim();
+            if (h.length === 3) {
+                h = h.split('').map((c) => c + c).join('');
+            }
+            const r = parseInt(h.slice(0, 2), 16);
+            const g = parseInt(h.slice(2, 4), 16);
+            const b = parseInt(h.slice(4, 6), 16);
+            const a = h.length >= 8 ? parseInt(h.slice(6, 8), 16) / 255 : 1;
+            if ([r, g, b, a].some((n) => Number.isNaN(n))) return null;
+            return { r, g, b, a };
+        }
+
+        function parseCssColorToRgba(raw) {
+            const t = String(raw).trim();
+            if (t.startsWith('#')) return parseCssHexToRgba(t);
+            const m = t.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/i);
+            if (m) {
+                const r = Number(m[1]);
+                const g = Number(m[2]);
+                const b = Number(m[3]);
+                const a = m[4] !== undefined ? Number(m[4]) : 1;
+                if ([r, g, b, a].some((n) => Number.isNaN(n))) return null;
+                return { r, g, b, a };
+            }
+            return null;
+        }
+
+        function blendRgbOverWhite(r, g, b, a) {
+            return {
+                r: Math.round(r * a + 255 * (1 - a)),
+                g: Math.round(g * a + 255 * (1 - a)),
+                b: Math.round(b * a + 255 * (1 - a)),
+            };
+        }
+
+        function relativeLuminanceSrgb(r, g, b) {
+            const lin = [r, g, b].map((v) => {
+                const x = v / 255;
+                return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2];
+        }
+
+        function isPaletteChoiceDarkForPlaceholder(cssVarName) {
+            const raw = getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();
+            const rgba = parseCssColorToRgba(raw);
+            if (!rgba) return false;
+            const blended = blendRgbOverWhite(rgba.r, rgba.g, rgba.b, rgba.a);
+            return relativeLuminanceSrgb(blended.r, blended.g, blended.b) < 0.45;
+        }
+
+        function applyBackgroundColor() {
+            const checked = document.querySelector('input[name="pageBackground"]:checked');
+            if (!checked) return;
+            const cssVar = BACKGROUND_PALETTE[checked.value];
+            if (!cssVar) return;
+            document.documentElement.style.setProperty('--page-bg', `var(${cssVar})`);
+            if (videoPlaceholder) {
+                videoPlaceholder.classList.toggle('video-placeholder--on-dark', isPaletteChoiceDarkForPlaceholder(cssVar));
+            }
+        }
+
+        document.querySelectorAll('input[name="pageBackground"]').forEach((input) => {
+            input.addEventListener('change', applyBackgroundColor);
+        });
+        applyBackgroundColor();
+
+        const previewCropInput = document.getElementById('previewCrop9x16');
+        const previewHint = document.getElementById('previewHint');
+
+        function syncPreviewCropMode() {
+            if (!dropZone || !previewCropInput) return;
+            dropZone.classList.toggle('video-stage--crop', previewCropInput.checked);
+            if (previewHint) {
+                previewHint.textContent = previewCropInput.checked
+                    ? 'Or drag a video onto the preview — fills the 9:16 frame (center crop).'
+                    : 'Or drag a video onto the preview — full video letterboxed in 9:16 (no crop).';
+            }
+        }
+        if (previewCropInput) {
+            previewCropInput.addEventListener('change', syncPreviewCropMode);
+            syncPreviewCropMode();
+        }
+
+        const previewDropShadowInput = document.getElementById('previewDropShadow');
+
+        function syncPreviewDropShadow() {
+            if (!videoPicture || !previewDropShadowInput) return;
+            videoPicture.classList.toggle('video-picture--no-shadow', !previewDropShadowInput.checked);
+        }
+        if (previewDropShadowInput) {
+            previewDropShadowInput.addEventListener('change', syncPreviewDropShadow);
+            syncPreviewDropShadow();
+        }
+
+        const trimPanel = document.getElementById('trimPanel');
+        const trimEnabled = document.getElementById('trimEnabled');
+        const trimInputsRow = document.getElementById('trimInputsRow');
+        const trimLoopRow = document.getElementById('trimLoopRow');
+        const trimStartInput = document.getElementById('trimStart');
+        const trimEndInput = document.getElementById('trimEnd');
+        const trimLoopCheckbox = document.getElementById('trimLoop');
+        const trimHint = document.getElementById('trimHint');
+        const trimTimeline = document.getElementById('trimTimeline');
+        const trimTrack = document.getElementById('trimTrack');
+        const trimPlayhead = document.getElementById('trimPlayhead');
+        const trimDimLeft = document.getElementById('trimDimLeft');
+        const trimDimRight = document.getElementById('trimDimRight');
+        const trimRangeBar = document.getElementById('trimRangeBar');
+        const trimHandleStart = document.getElementById('trimHandleStart');
+        const trimHandleEnd = document.getElementById('trimHandleEnd');
+        const trimLabelIn = document.getElementById('trimLabelIn');
+        const trimLabelOut = document.getElementById('trimLabelOut');
+        const trimLabelLen = document.getElementById('trimLabelLen');
+        const recordingStageEl = document.getElementById('recordingStage');
+
+        /** True while tab capture UI should hide trim chrome (avoids flashes in recording). */
+        let recordingUiActive = false;
+
+        let trimDragWhich = null;
+
+        screenVideo.loop = true;
+
+        function formatTimeCode(t) {
+            if (!Number.isFinite(t) || t < 0) return '0:00';
+            const m = Math.floor(t / 60);
+            const sec = t - m * 60;
+            const sInt = Math.floor(sec);
+            const dec = Math.round((sec - sInt) * 10);
+            const secStr = dec > 0 ? `${sInt}.${dec}` : String(sInt).padStart(2, '0');
+            return `${m}:${secStr}`;
+        }
+
+        function seekFromTimelineClientX(clientX) {
+            const dur = getVideoDuration();
+            if (!dur || !trimTrack) return;
+            const rect = trimTrack.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            screenVideo.currentTime = ratio * dur;
+            refreshTrimTimelineUI();
+        }
+
+        function setTrimFromPointer(clientX, which) {
+            const dur = getVideoDuration();
+            if (!dur || !trimTrack) return;
+            const rect = trimTrack.getBoundingClientRect();
+            const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            const t = ratio * dur;
+            const b = readTrimBounds();
+            if (!b.active) return;
+            if (which === 'start') {
+                let ns = Math.min(t, b.end - 1 / 30);
+                ns = Math.max(0, ns);
+                trimStartInput.value = String(Math.round(ns * 1000) / 1000);
+            } else {
+                let ne = Math.max(t, b.start + 1 / 30);
+                ne = Math.min(dur, ne);
+                trimEndInput.value = String(Math.round(ne * 1000) / 1000);
+                delete trimEndInput.dataset.autoEnd;
+            }
+            updateTrimHint();
+            refreshTrimTimelineUI();
+        }
+
+        function endTrimDrag() {
+            trimDragWhich = null;
+            window.removeEventListener('pointermove', onTrimDragMove);
+        }
+
+        function onTrimDragMove(e) {
+            if (!trimDragWhich) return;
+            setTrimFromPointer(e.clientX, trimDragWhich);
+        }
+
+        function onTrimDragEnd() {
+            endTrimDrag();
+        }
+
+        function beginTrimDrag(which, e) {
+            if (!trimEnabled.checked) return;
+            e.preventDefault();
+            e.stopPropagation();
+            trimDragWhich = which;
+            window.addEventListener('pointermove', onTrimDragMove);
+            window.addEventListener('pointerup', onTrimDragEnd, { once: true });
+            window.addEventListener('pointercancel', onTrimDragEnd, { once: true });
+        }
+
+        function refreshTrimTimelineUI() {
+            const dur = getVideoDuration();
+            if (!trimTrack || !trimPlayhead) return;
+            if (!dur) return;
+
+            const playPct = (screenVideo.currentTime / dur) * 100;
+            trimPlayhead.style.left = `${Math.min(100, Math.max(0, playPct))}%`;
+
+            const b = readTrimBounds();
+            const trimming = Boolean(b.active);
+
+            if (trimTimeline) {
+                trimTimeline.classList.toggle('trim-timeline--trimming', trimming);
+            }
+
+            if (trimming) {
+                const sp = (b.start / dur) * 100;
+                const ep = (b.end / dur) * 100;
+                const w = Math.max(0, ep - sp);
+                trimDimLeft.style.width = `${sp}%`;
+                trimDimRight.style.left = `${ep}%`;
+                trimDimRight.style.width = `${100 - ep}%`;
+                trimRangeBar.style.left = `${sp}%`;
+                trimRangeBar.style.width = `${w}%`;
+                trimHandleStart.style.left = `${sp}%`;
+                trimHandleEnd.style.left = `${ep}%`;
+            } else {
+                trimDimLeft.style.width = '0%';
+                trimDimRight.style.left = '100%';
+                trimDimRight.style.width = '0%';
+                trimRangeBar.style.left = '0%';
+                trimRangeBar.style.width = '100%';
+                trimHandleStart.style.left = '0%';
+                trimHandleEnd.style.left = '100%';
+            }
+
+            if (trimLabelIn) {
+                trimLabelIn.textContent = `In ${formatTimeCode(trimming ? b.start : 0)}`;
+            }
+            if (trimLabelOut) {
+                trimLabelOut.textContent = `Out ${formatTimeCode(trimming ? b.end : dur)}`;
+            }
+            if (trimLabelLen) {
+                trimLabelLen.textContent = trimming
+                    ? `${formatTimeCode(b.end - b.start)} selected`
+                    : `${formatTimeCode(dur)} total`;
+            }
+        }
+
+        function getVideoDuration() {
+            const d = screenVideo.duration;
+            return Number.isFinite(d) && d > 0 ? d : 0;
+        }
+
+        function readTrimBounds() {
+            const dur = getVideoDuration();
+            if (!trimEnabled || !trimEnabled.checked || !dur) {
+                return { start: 0, end: dur, active: false, loop: false };
+            }
+            let start = parseFloat(trimStartInput.value);
+            let end = parseFloat(trimEndInput.value);
+            if (!Number.isFinite(start)) start = 0;
+            if (!Number.isFinite(end) || trimEndInput.value === '') {
+                end = dur;
+            }
+            start = Math.max(0, Math.min(start, dur));
+            end = Math.max(0, Math.min(end, dur));
+            if (end <= start) {
+                end = Math.min(dur, start + 1 / 30);
+            }
+            return {
+                start,
+                end,
+                active: true,
+                loop: Boolean(trimLoopCheckbox && trimLoopCheckbox.checked),
+            };
+        }
+
+        function updateTrimHint() {
+            if (!trimHint) return;
+            const dur = getVideoDuration();
+            if (!dur) {
+                trimHint.textContent = '';
+                return;
+            }
+            const b = readTrimBounds();
+            if (!b.active) {
+                trimHint.textContent = `Duration: ${dur.toFixed(2)} s`;
+                return;
+            }
+            const len = Math.max(0, b.end - b.start);
+            trimHint.textContent = `Clip length: ${len.toFixed(2)} s (of ${dur.toFixed(2)} s)`;
+        }
+
+        function syncTrimInputsToDuration() {
+            const dur = getVideoDuration();
+            if (!dur || !trimStartInput || !trimEndInput) return;
+            trimStartInput.max = dur;
+            trimEndInput.max = dur;
+            if (trimEndInput.dataset.autoEnd === '1' || trimEndInput.value === '') {
+                trimEndInput.value = String(Math.round(dur * 100) / 100);
+                trimEndInput.dataset.autoEnd = '1';
+            }
+            updateTrimHint();
+            refreshTrimTimelineUI();
+        }
+
+        function updateTrimSubUi() {
+            const on = trimEnabled && trimEnabled.checked;
+            if (trimLoopRow) trimLoopRow.hidden = !on;
+            if (trimHandleStart) trimHandleStart.tabIndex = on ? 0 : -1;
+            if (trimHandleEnd) trimHandleEnd.tabIndex = on ? 0 : -1;
+            applyVideoLoopMode();
+            updateTrimHint();
+            refreshTrimTimelineUI();
+        }
+
+        function applyVideoLoopMode() {
+            const b = readTrimBounds();
+            screenVideo.loop = !b.active;
+        }
+
+        function clampPlaybackToTrim() {
+            if (!screenVideo.src) return;
+            const b = readTrimBounds();
+            if (!b.active) return;
+            const t = screenVideo.currentTime;
+            if (t < b.start) {
+                screenVideo.currentTime = b.start;
+            } else if (t >= b.end) {
+                if (b.loop) {
+                    screenVideo.currentTime = b.start;
+                } else {
+                    screenVideo.pause();
+                    screenVideo.currentTime = Math.max(b.start, b.end - 0.02);
+                }
+            }
+        }
+
+        function onVideoTimeUpdate() {
+            clampPlaybackToTrim();
+            refreshTrimTimelineUI();
+        }
+
+        screenVideo.addEventListener('timeupdate', onVideoTimeUpdate);
+
+        screenVideo.addEventListener('loadedmetadata', () => {
+            if (trimPanel) trimPanel.hidden = false;
+            if (trimTimeline) {
+                trimTimeline.hidden = getVideoDuration() <= 0 || recordingUiActive;
+            }
+            syncTrimInputsToDuration();
+            applyVideoLoopMode();
+            updateTrimSubUi();
+            refreshTrimTimelineUI();
+        });
+
+        if (trimEnabled) {
+            trimEnabled.addEventListener('change', () => {
+                updateTrimSubUi();
+                clampPlaybackToTrim();
+            });
+        }
+        if (trimStartInput) {
+            trimStartInput.addEventListener('input', () => {
+                updateTrimHint();
+                refreshTrimTimelineUI();
+            });
+        }
+        if (trimEndInput) {
+            trimEndInput.addEventListener('input', () => {
+                delete trimEndInput.dataset.autoEnd;
+                updateTrimHint();
+                refreshTrimTimelineUI();
+            });
+        }
+
+        if (trimTrack) {
+            trimTrack.addEventListener('click', (e) => {
+                if (e.target.closest('.trim-handle')) return;
+                seekFromTimelineClientX(e.clientX);
+            });
+        }
+        if (trimHandleStart) {
+            trimHandleStart.addEventListener('pointerdown', (e) => beginTrimDrag('start', e));
+        }
+        if (trimHandleEnd) {
+            trimHandleEnd.addEventListener('pointerdown', (e) => beginTrimDrag('end', e));
+        }
+        if (trimLoopCheckbox) {
+            trimLoopCheckbox.addEventListener('change', applyVideoLoopMode);
+        }
+
+        screenVideo.addEventListener('emptied', () => {
+            if (trimPanel) trimPanel.hidden = true;
+            if (trimTimeline) trimTimeline.hidden = true;
+            if (trimEndInput) {
+                trimEndInput.value = '';
+                delete trimEndInput.dataset.autoEnd;
+            }
+            if (trimStartInput) trimStartInput.value = '0';
+            if (trimEnabled) trimEnabled.checked = false;
+            screenVideo.loop = true;
+            endTrimDrag();
+            updateTrimSubUi();
+        });
+
+        function revokeObjectUrl() {
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = null;
+            }
+        }
+
+        function syncPlayPauseButton() {
+            if (!playPauseButton || !screenVideo) return;
+            const hasSrc = !!screenVideo.src;
+            playPauseButton.disabled = !hasSrc;
+            if (!hasSrc) {
+                playPauseButton.textContent = 'Play';
+                playPauseButton.setAttribute('aria-label', 'Play or pause video');
+                return;
+            }
+            const playing = !screenVideo.paused;
+            playPauseButton.textContent = playing ? 'Pause' : 'Play';
+            playPauseButton.setAttribute('aria-label', playing ? 'Pause video' : 'Play video');
+        }
+
+        function setVideoSource(file) {
+            if (!file || !file.type.startsWith('video/')) return;
+            revokeObjectUrl();
+            objectUrl = URL.createObjectURL(file);
+            screenVideo.src = objectUrl;
+            videoPlaceholder.hidden = true;
+            if (videoPicture) {
+                videoPicture.classList.add('is-visible');
+            }
+            if (trimStartInput) trimStartInput.value = '0';
+            if (trimEndInput) {
+                trimEndInput.value = '';
+                trimEndInput.dataset.autoEnd = '1';
+            }
+            if (trimEnabled) trimEnabled.checked = false;
+            updateTrimSubUi();
+            syncPlayPauseButton();
+        }
+
+        videoFile.addEventListener('change', () => {
+            const file = videoFile.files && videoFile.files[0];
+            if (file) setVideoSource(file);
+        });
+
+        screenVideo.addEventListener('play', syncPlayPauseButton);
+        screenVideo.addEventListener('pause', syncPlayPauseButton);
+        screenVideo.addEventListener('emptied', syncPlayPauseButton);
+
+        playPauseButton.addEventListener('click', () => {
+            if (!screenVideo.src) return;
+            if (screenVideo.paused) {
+                const b = readTrimBounds();
+                if (b.active && (screenVideo.currentTime < b.start || screenVideo.currentTime >= b.end)) {
+                    screenVideo.currentTime = b.start;
+                }
+                screenVideo.play().catch(() => {});
+            } else {
+                screenVideo.pause();
+            }
+        });
+
+        syncPlayPauseButton();
+
+        ['dragenter', 'dragover'].forEach((evt) => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('is-dragover');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach((evt) => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('is-dragover');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const file = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) setVideoSource(file);
+        });
+
+        const RECORD_FPS = 60;
+        const RECORD_BITRATE = 50000000;
+        const MIME_TYPE_CANDIDATES = [
+            'video/webm;codecs=vp9',
+            'video/webm;codecs=vp8',
+            'video/webm'
+        ];
+
+        const CONVERT_SERVER_DEFAULT = 'http://127.0.0.1:8000';
+
+        function getConvertUrlOrigin() {
+            if (window.location.protocol === 'file:') {
+                return CONVERT_SERVER_DEFAULT;
+            }
+            return window.location.origin;
+        }
+
+        async function refreshExportServerHint() {
+            const el = document.getElementById('exportServerHint');
+            if (!el) return;
+            el.hidden = false;
+            const base = getConvertUrlOrigin();
+            let serverOk = false;
+            try {
+                const r = await fetch(`${base}/__video_export_server__`, { cache: 'no-store' });
+                if (r.ok) {
+                    const j = await r.json();
+                    serverOk = Boolean(j && j.videoExportServer);
+                }
+            } catch (e) {
+                serverOk = false;
+            }
+            el.classList.toggle('export-server-hint--bad', !serverOk);
+            if (!serverOk) {
+                el.textContent =
+                    'MP4 export unavailable: run python3 server.py in this folder. Do not use python -m http.server (it cannot POST /convert — HTTP 501). Then open http://127.0.0.1:8000/';
+                return;
+            }
+            if (window.location.protocol === 'file:') {
+                el.textContent =
+                    'Export server OK. Prefer opening http://127.0.0.1:8000/index.html instead of file://.';
+            } else {
+                el.textContent =
+                    'Export server OK. Feed 4:5 → 1080×1350 px (center crop of the recording).';
+            }
+        }
+        refreshExportServerHint();
+
+        let isRecording = false;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let stream = null;
+
+        function getSupportedMimeType() {
+            return MIME_TYPE_CANDIDATES.find((type) => MediaRecorder.isTypeSupported(type)) || '';
+        }
+
+        function setCaptureUiState(isCapturing) {
+            recordingUiActive = isCapturing;
+            const controlsPanel = document.querySelector('.controls-panel');
+            const stopBtn = document.getElementById('stopRecordButton');
+            if (controlsPanel) {
+                controlsPanel.classList.toggle('capture-hidden', isCapturing);
+            }
+            if (stopBtn) {
+                stopBtn.hidden = !isCapturing;
+            }
+            if (recordingStageEl) {
+                recordingStageEl.classList.toggle('recording-stage--capturing', isCapturing);
+            }
+            if (trimTimeline) {
+                trimTimeline.hidden = isCapturing ? true : getVideoDuration() <= 0;
+            }
+        }
+
+        function flushPaint() {
+            return new Promise((resolve) => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(resolve);
+                });
+            });
+        }
+
+        function getSelectedExportPreset() {
+            const selectedPreset = document.querySelector('input[name="exportPreset"]:checked');
+            return selectedPreset ? selectedPreset.value : 'story';
+        }
+
+        function getPresetDownloadName(exportPreset) {
+            const suffixMap = {
+                square: 'square-1x1',
+                feed: 'feed-4x5',
+                story: 'story-9x16'
+            };
+            return `video-export-${suffixMap[exportPreset] || 'story-9x16'}-hq.mp4`;
+        }
+
+        function downloadBlob(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = filename;
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(url);
+        }
+
+        function cleanupStream() {
+            if (!stream) return;
+            stream.getTracks().forEach((track) => track.stop());
+            stream = null;
+        }
+
+        async function convertWebmToH264Mp4(webmBlob, exportPreset) {
+            const convertUrl = `${getConvertUrlOrigin()}/convert?preset=${encodeURIComponent(exportPreset)}`;
+            let response;
+            try {
+                response = await fetch(convertUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': webmBlob.type || 'video/webm'
+                    },
+                    body: webmBlob
+                });
+            } catch (networkErr) {
+                const msg = networkErr && networkErr.message ? networkErr.message : String(networkErr);
+                throw new Error(
+                    `Could not reach ${convertUrl}. Use http://127.0.0.1:8000 with python3 server.py running (not file:// or another Live Server port). ${msg}`
+                );
+            }
+
+            if (!response.ok) {
+                if (response.status === 501) {
+                    throw new Error(
+                        'HTTP 501: Wrong server. The command python -m http.server does not support POST. Quit it and run python3 server.py from this project folder, then open http://127.0.0.1:8000/'
+                    );
+                }
+                let message = `HTTP ${response.status}`;
+                try {
+                    const errorPayload = await response.json();
+                    if (errorPayload && errorPayload.details) {
+                        message = errorPayload.details.trim() || message;
+                    } else if (errorPayload && errorPayload.error) {
+                        message = errorPayload.error;
+                    }
+                } catch (e) {
+                    try {
+                        const t = await response.text();
+                        if (t) {
+                            message = t.slice(0, 500);
+                        }
+                    } catch (e2) {
+                        // ignore
+                    }
+                }
+                throw new Error(message);
+            }
+
+            return await response.blob();
+        }
+
+        async function startRecording() {
+            const startBtn = document.getElementById('startRecordButton');
+            const stopBtn = document.getElementById('stopRecordButton');
+            if (!startBtn || isRecording) return;
+
+            startBtn.textContent = 'Share this tab…';
+            startBtn.disabled = true;
+
+            try {
+                const displayMediaOptions = {
+                    video: {
+                        cursor: 'never'
+                    },
+                    audio: false,
+                    preferCurrentTab: true
+                };
+
+                stream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
+                const videoTrack = stream.getVideoTracks()[0];
+                try {
+                    await videoTrack.applyConstraints({
+                        frameRate: { ideal: RECORD_FPS, max: RECORD_FPS }
+                    });
+                } catch (constraintError) {
+                    console.warn('Frame-rate constraints not applied:', constraintError);
+                }
+
+                setCaptureUiState(true);
+                await flushPaint();
+
+                const mimeType = getSupportedMimeType();
+                const recorderOptions = mimeType
+                    ? { mimeType, videoBitsPerSecond: RECORD_BITRATE }
+                    : { videoBitsPerSecond: RECORD_BITRATE };
+
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, recorderOptions);
+
+                stream.getVideoTracks()[0].addEventListener('ended', () => {
+                    stopRecording();
+                });
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data && event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onerror = (event) => {
+                    console.error('MediaRecorder error:', event);
+                    stopRecording();
+                };
+
+                mediaRecorder.onstop = async () => {
+                    cleanupStream();
+                    setCaptureUiState(false);
+                    isRecording = false;
+                    if (stopBtn) {
+                        stopBtn.disabled = false;
+                        stopBtn.textContent = 'Stop recording';
+                    }
+
+                    if (recordedChunks.length > 0) {
+                        const blobType = mimeType || 'video/webm';
+                        const webmBlob = new Blob(recordedChunks, { type: blobType });
+                        const exportPreset = getSelectedExportPreset();
+                        startBtn.textContent = 'Converting…';
+                        startBtn.disabled = true;
+
+                        try {
+                            const mp4Blob = await convertWebmToH264Mp4(webmBlob, exportPreset);
+                            downloadBlob(mp4Blob, getPresetDownloadName(exportPreset));
+                        } catch (conversionError) {
+                            console.error('MP4 conversion failed:', conversionError);
+                            downloadBlob(webmBlob, 'video-capture.webm');
+                            let reason = conversionError && conversionError.message ? conversionError.message : 'Unknown conversion error';
+                            if (reason.length > 700) {
+                                reason = `${reason.slice(0, 700)}… (full text in console)`;
+                            }
+                            alert(
+                                `MP4 conversion failed.\n\n${reason}\n\nA WebM file was downloaded instead.`
+                            );
+                        }
+                    } else {
+                        alert('No video data was captured. Please try again.');
+                    }
+
+                    startBtn.textContent = 'Start recording';
+                    startBtn.disabled = false;
+                };
+
+                if (screenVideo.src) {
+                    const tb = readTrimBounds();
+                    screenVideo.currentTime = tb.active ? tb.start : 0;
+                    screenVideo.play().catch(() => {});
+                }
+
+                if (stopBtn) {
+                    stopBtn.disabled = false;
+                }
+
+                await flushPaint();
+                mediaRecorder.start(100);
+                isRecording = true;
+                startBtn.textContent = 'Start recording';
+                startBtn.disabled = false;
+            } catch (err) {
+                console.error('Error accessing tab capture:', err);
+                cleanupStream();
+                setCaptureUiState(false);
+                isRecording = false;
+                startBtn.textContent = 'Start recording';
+                startBtn.disabled = false;
+                if (err.name === 'NotAllowedError') {
+                    alert('Tab capture was denied. Please allow it and retry.');
+                } else {
+                    alert('Recording failed: ' + err.message);
+                }
+            }
+        }
+
+        function stopRecording() {
+            if (!isRecording) return;
+
+            const stopBtn = document.getElementById('stopRecordButton');
+            if (stopBtn) {
+                stopBtn.disabled = true;
+                stopBtn.textContent = 'Finalizing…';
+            }
+
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.requestData();
+                mediaRecorder.stop();
+            } else {
+                cleanupStream();
+                setCaptureUiState(false);
+                isRecording = false;
+                if (stopBtn) {
+                    stopBtn.textContent = 'Stop recording';
+                    stopBtn.disabled = false;
+                }
+            }
+        }
+
+        document.getElementById('startRecordButton').addEventListener('click', () => {
+            startRecording();
+        });
+
+        document.getElementById('stopRecordButton').addEventListener('click', () => {
+            stopRecording();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isRecording) {
+                e.preventDefault();
+                stopRecording();
+            }
+        });
+    </script>
+</body>
+</html>
