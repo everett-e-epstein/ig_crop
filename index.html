@@ -692,10 +692,7 @@
             feed: { width: 1080, height: 1350 },
             story: { width: 1080, height: 1920 }
         };
-        const FFMPEG_PACKAGE_VERSION = '0.12.10';
-        const FFMPEG_CORE_VERSION = '0.12.6';
-        const FFMPEG_BASE_CDN = `https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm`;
-        const FFMPEG_CORE_CDN = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm`;
+        const FFMPEG_LOCAL_BASE = '/assets/ffmpeg';
 
         const CONVERT_SERVER_DEFAULT = 'http://127.0.0.1:8000';
         let convertServerAvailable = false;
@@ -814,12 +811,12 @@
 
         async function getBrowserFfmpegRuntime() {
             if (ffmpegBrowserRuntime) return ffmpegBrowserRuntime;
-            const ffmpegMod = await import(`${FFMPEG_BASE_CDN}/index.js`);
+            const ffmpegMod = await import(`${FFMPEG_LOCAL_BASE}/index.js`);
             const ffmpeg = new ffmpegMod.FFmpeg();
             await ffmpeg.load({
-                workerURL: `${FFMPEG_BASE_CDN}/worker.js`,
-                coreURL: `${FFMPEG_CORE_CDN}/ffmpeg-core.js`,
-                wasmURL: `${FFMPEG_CORE_CDN}/ffmpeg-core.wasm`
+                classWorkerURL: `${FFMPEG_LOCAL_BASE}/worker.js`,
+                coreURL: `${FFMPEG_LOCAL_BASE}/ffmpeg-core.js`,
+                wasmURL: `${FFMPEG_LOCAL_BASE}/ffmpeg-core.wasm`
             });
             ffmpegBrowserRuntime = { ffmpeg };
             return ffmpegBrowserRuntime;
