@@ -687,8 +687,17 @@
             'video/webm;codecs=vp8',
             'video/webm'
         ];
+        const EXPORT_PRESET_DIMENSIONS = {
+            square: { width: 1080, height: 1080 },
+            feed: { width: 1080, height: 1350 },
+            story: { width: 1080, height: 1920 }
+        };
+        const FFMPEG_PACKAGE_VERSION = '0.12.10';
+        const FFMPEG_CORE_VERSION = '0.12.6';
 
         const CONVERT_SERVER_DEFAULT = 'http://127.0.0.1:8000';
+        let convertServerAvailable = false;
+        let ffmpegBrowserRuntime = null;
 
         function getConvertUrlOrigin() {
             if (window.location.protocol === 'file:') {
@@ -712,8 +721,15 @@
             } catch (e) {
                 serverOk = false;
             }
+            convertServerAvailable = serverOk;
             el.classList.toggle('export-server-hint--bad', !serverOk);
             if (!serverOk) {
+                if (window.location.protocol !== 'file:') {
+                    el.classList.remove('export-server-hint--bad');
+                    el.textContent =
+                        'Server-side /convert is unavailable here, so this deploy will convert to MP4 in-browser (slower but Vercel-compatible).';
+                    return;
+                }
                 el.textContent =
                     'MP4 export unavailable: run python3 server.py in this folder. Do not use python -m http.server (it cannot POST /convert — HTTP 501). Then open http://127.0.0.1:8000/';
                 return;
@@ -794,7 +810,85 @@
             stream = null;
         }
 
+        async function getBrowserFfmpegRuntime() {
+            if (ffmpegBrowserRuntime) return ffmpegBrowserRuntime;
+            const ffmpegMod = await import(`https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
+            const utilMod = await import(`https://cdn.jsdelivr.net/npm/@ffmpeg/util@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
+            const ffmpeg = new ffmpegMod.FFmpeg();
+            await ffmpeg.load({
+                coreURL: `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.js`,
+                wasmURL: `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.wasm`
+            });
+            ffmpegBrowserRuntime = { ffmpeg, fetchFile: utilMod.fetchFile };
+            return ffmpegBrowserRuntime;
+        }
+
+        function getPresetDimensions(exportPreset) {
+            return EXPORT_PRESET_DIMENSIONS[exportPreset] || EXPORT_PRESET_DIMENSIONS.story;
+        }
+
+        async function convertWebmToH264Mp4InBrowser(webmBlob, exportPreset) {
+            const { ffmpeg, fetchFile } = await getBrowserFfmpegRuntime();
+            const { width, height } = getPresetDimensions(exportPreset);
+            const inputPath = `input-${Date.now()}.webm`;
+            const outputPath = `output-${Date.now()}.mp4`;
+            const vf = `scale=${width}:${height}:force_original_aspect_ratio=increase,crop=${width}:${height}:(iw-${width})/2:(ih-${height})/2,setsar=1,fps=30`;
+            await ffmpeg.writeFile(inputPath, await fetchFile(webmBlob));
+            await ffmpeg.exec([
+                '-i',
+                inputPath,
+                '-f',
+                'lavfi',
+                '-i',
+                'anullsrc=channel_layout=stereo:sample_rate=48000',
+                '-map',
+                '0:v:0',
+                '-map',
+                '1:a:0',
+                '-shortest',
+                '-vf',
+                vf,
+                '-c:v',
+                'libx264',
+                '-profile:v',
+                'baseline',
+                '-level',
+                '5.1',
+                '-pix_fmt',
+                'yuv420p',
+                '-crf',
+                '20',
+                '-preset',
+                'medium',
+                '-bf',
+                '0',
+                '-refs',
+                '1',
+                '-x264-params',
+                'aud=1',
+                '-tag:v',
+                'avc1',
+                '-c:a',
+                'aac',
+                '-b:a',
+                '128k',
+                '-ar',
+                '48000',
+                '-movflags',
+                '+faststart',
+                '-f',
+                'mp4',
+                outputPath
+            ]);
+            const mp4Data = await ffmpeg.readFile(outputPath);
+            await Promise.allSettled([ffmpeg.deleteFile(inputPath), ffmpeg.deleteFile(outputPath)]);
+            return new Blob([mp4Data], { type: 'video/mp4' });
+        }
+
         async function convertWebmToH264Mp4(webmBlob, exportPreset) {
+            if (!convertServerAvailable) {
+                return await convertWebmToH264Mp4InBrowser(webmBlob, exportPreset);
+            }
             const convertUrl = `${getConvertUrlOrigin()}/convert?preset=${encodeURIComponent(exportPreset)}`;
             let response;
             try {
@@ -810,6 +904,15 @@
                 throw new Error(
                     `Could not reach ${convertUrl}. Use http://127.0.0.1:8000 with python3 server.py running (not file:// or another Live Server port). ${msg}`
                 );
+            }
+
+            if (response.ok) {
+                return await response.blob();
+            }
+
+            if (response.status === 404 || response.status === 405 || response.status === 501) {
+                convertServerAvailable = false;
+                return await convertWebmToH264Mp4InBrowser(webmBlob, exportPreset);
             }
 
             if (!response.ok) {
@@ -838,8 +941,6 @@
                 }
                 throw new Error(message);
             }
-
-            return await response.blob();
         }
 
         async function startRecording() {
