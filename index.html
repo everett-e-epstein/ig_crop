@@ -694,6 +694,8 @@
         };
         const FFMPEG_PACKAGE_VERSION = '0.12.10';
         const FFMPEG_CORE_VERSION = '0.12.6';
+        const FFMPEG_BASE_CDN = `https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm`;
+        const FFMPEG_CORE_CDN = `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm`;
 
         const CONVERT_SERVER_DEFAULT = 'http://127.0.0.1:8000';
         let convertServerAvailable = false;
@@ -812,11 +814,12 @@
 
         async function getBrowserFfmpegRuntime() {
             if (ffmpegBrowserRuntime) return ffmpegBrowserRuntime;
-            const ffmpegMod = await import(`https://unpkg.com/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
+            const ffmpegMod = await import(`${FFMPEG_BASE_CDN}/index.js`);
             const ffmpeg = new ffmpegMod.FFmpeg();
             await ffmpeg.load({
-                coreURL: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.js`,
-                wasmURL: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.wasm`
+                workerURL: `${FFMPEG_BASE_CDN}/worker.js`,
+                coreURL: `${FFMPEG_CORE_CDN}/ffmpeg-core.js`,
+                wasmURL: `${FFMPEG_CORE_CDN}/ffmpeg-core.wasm`
             });
             ffmpegBrowserRuntime = { ffmpeg };
             return ffmpegBrowserRuntime;
