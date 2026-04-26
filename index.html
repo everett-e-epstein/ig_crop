@@ -812,14 +812,13 @@
 
         async function getBrowserFfmpegRuntime() {
             if (ffmpegBrowserRuntime) return ffmpegBrowserRuntime;
-            const ffmpegMod = await import(`https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
-            const utilMod = await import(`https://cdn.jsdelivr.net/npm/@ffmpeg/util@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
+            const ffmpegMod = await import(`https://unpkg.com/@ffmpeg/ffmpeg@${FFMPEG_PACKAGE_VERSION}/dist/esm/index.js`);
             const ffmpeg = new ffmpegMod.FFmpeg();
             await ffmpeg.load({
-                coreURL: `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.js`,
-                wasmURL: `https://cdn.jsdelivr.net/npm/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.wasm`
+                coreURL: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.js`,
+                wasmURL: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/esm/ffmpeg-core.wasm`
             });
-            ffmpegBrowserRuntime = { ffmpeg, fetchFile: utilMod.fetchFile };
+            ffmpegBrowserRuntime = { ffmpeg };
             return ffmpegBrowserRuntime;
         }
 
@@ -828,12 +827,12 @@
         }
 
         async function convertWebmToH264Mp4InBrowser(webmBlob, exportPreset) {
-            const { ffmpeg, fetchFile } = await getBrowserFfmpegRuntime();
+            const { ffmpeg } = await getBrowserFfmpegRuntime();
             const { width, height } = getPresetDimensions(exportPreset);
             const inputPath = `input-${Date.now()}.webm`;
             const outputPath = `output-${Date.now()}.mp4`;
             const vf = `scale=${width}:${height}:force_original_aspect_ratio=increase,crop=${width}:${height}:(iw-${width})/2:(ih-${height})/2,setsar=1,fps=30`;
-            await ffmpeg.writeFile(inputPath, await fetchFile(webmBlob));
+            await ffmpeg.writeFile(inputPath, new Uint8Array(await webmBlob.arrayBuffer()));
             await ffmpeg.exec([
                 '-i',
                 inputPath,
