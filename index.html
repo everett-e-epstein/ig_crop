@@ -79,6 +79,21 @@
                 <span>Crop to 9:16</span>
             </label>
         </div>
+        <div class="controls-row controls-row--video-scale">
+            <label class="video-scale-control" for="videoScale">
+                <span id="videoScaleLabel">Video Size</span>
+                <span id="videoScaleValue" aria-live="polite">100%</span>
+            </label>
+            <input
+                type="range"
+                id="videoScale"
+                min="40"
+                max="140"
+                step="1"
+                value="100"
+                aria-labelledby="videoScaleLabel"
+            >
+        </div>
         <div id="trimPanel" class="trim-panel" hidden>
             <div class="export-options-title">Trim</div>
             <label class="export-option trim-toggle">
@@ -274,6 +289,8 @@
 
         const previewCropInput = document.getElementById('previewCrop9x16');
         const previewHint = document.getElementById('previewHint');
+        const videoScaleInput = document.getElementById('videoScale');
+        const videoScaleValue = document.getElementById('videoScaleValue');
 
         function syncPreviewCropMode() {
             if (!dropZone || !previewCropInput) return;
@@ -287,6 +304,24 @@
         if (previewCropInput) {
             previewCropInput.addEventListener('change', syncPreviewCropMode);
             syncPreviewCropMode();
+        }
+
+        function syncVideoScale() {
+            if (!videoScaleInput || !screenVideo) return;
+            const sliderValue = Number(videoScaleInput.value);
+            const validValue = Number.isFinite(sliderValue)
+                ? Math.min(140, Math.max(40, sliderValue))
+                : 100;
+            const scale = validValue / 100;
+            screenVideo.style.setProperty('--video-scale', scale.toFixed(2));
+            if (videoScaleValue) {
+                videoScaleValue.textContent = `${Math.round(validValue)}%`;
+            }
+        }
+        if (videoScaleInput) {
+            videoScaleInput.addEventListener('input', syncVideoScale);
+            videoScaleInput.addEventListener('change', syncVideoScale);
+            syncVideoScale();
         }
 
         const previewDropShadowInput = document.getElementById('previewDropShadow');

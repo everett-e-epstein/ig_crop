@@ -163,6 +163,8 @@ body {
     height: 100%;
     object-fit: cover;
     object-position: center;
+    transform: scale(var(--video-scale, 1));
+    transform-origin: center;
 }
 
 /* Crop off: letterbox full video inside 9:16 stage */
@@ -191,15 +193,31 @@ body {
     max-height: 100%;
     object-fit: contain;
     object-position: center;
+    transform: scale(var(--video-scale, 1));
+    transform-origin: center;
 }
 
 .controls-row--preview-shadow,
-.controls-row--preview-fit {
+.controls-row--preview-fit,
+.controls-row--video-scale {
     grid-template-columns: 1fr;
     margin-top: 8px;
 }
 
 .preview-fit-option {
+    width: 100%;
+}
+
+.video-scale-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.video-scale-control + input[type='range'] {
     width: 100%;
 }
 
@@ -249,7 +267,8 @@ body {
 }
 
 .controls-panel > .controls-row--preview-shadow,
-.controls-panel > .controls-row--preview-fit {
+.controls-panel > .controls-row--preview-fit,
+.controls-panel > .controls-row--video-scale {
     margin-top: 0;
 }
 
